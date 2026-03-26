@@ -1,6 +1,0 @@
-gymnasium
-numpy
-torch
-matplotlib
-
-# pip install -r requirements.txt
