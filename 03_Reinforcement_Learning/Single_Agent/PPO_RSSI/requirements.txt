@@ -1,0 +1,10 @@
+# --- 수학 연산 및 벡터 계산 ---
+numpy>=1.21.0
+
+# --- 강화학습 인경신경망 (PPO 알고리즘) ---
+torch>=2.0.0
+
+# --- 드론 비행 궤적 및 학습 그래프 시각화 ---
+matplotlib>=3.5.0
+
+# pip install -r requirements.txt
