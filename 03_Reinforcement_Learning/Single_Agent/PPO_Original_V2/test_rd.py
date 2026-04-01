@@ -74,7 +74,7 @@ def main():
 
     ax_map.set_xlim(0, 300)
     ax_map.set_ylim(0, 300)
-    ax_map.set_title("Drone Search Path (Signal Based)")
+    ax_map.set_title("Drone Search Path")
     ax_map.set_aspect('equal')
     
     for obs_data in env.obstacles:
