@@ -113,7 +113,7 @@ def evaluate_and_animate():
     # ────────────────────────────────
     # [오른쪽] 학습 보상 그래프
     # ────────────────────────────────
-    ax2.plot(rewards_history, color='royalblue', alpha=0.5, linewidth=0.8, label='Episode Reward')
+    ax2.plot(rewards_history, color='gray', alpha=0.5, linewidth=0.8, label='Episode Reward')
 
     # 100 에피소드 이동 평균
     if len(rewards_history) >= 100:
