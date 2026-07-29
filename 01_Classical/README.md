@@ -337,7 +337,3 @@ python run_dynamic_replanning.py
 4. Koenig, S., & Likhachev, M. (2002). **D* Lite.** *Proceedings of the 18th AAAI Conference on Artificial Intelligence*, 476–483. https://ojs.aaai.org/index.php/AAAI/article/view/8035
 
 ---
-
-## 12. 요약
-
-본 프로젝트에서는 서로 다른 경로 계획 접근법인 A*, APF, RRT, D* Lite를 공통 환경과 인터페이스로 구현하였다. 정적 실험을 통해 생성 경로의 형태와 지표 차이를 비교하였으며, 동적 실험을 통해 D* Lite가 새 장애물 발견 후 기존 탐색 정보를 활용하여 경로를 갱신하는 과정을 시각화하였다.
