@@ -254,10 +254,6 @@ c_2\mathbf{r}_2\odot(\mathbf{g}-\mathbf{x}_i)
 ├─ README.md
 ├─ requirements.txt
 ├─ run_single_comparison.py
-├─ run_aco.py
-├─ run_ga.py
-├─ run_gwo.py
-├─ run_pso.py
 │
 ├─ config/
 │  ├─ __init__.py
