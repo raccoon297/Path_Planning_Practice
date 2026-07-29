@@ -322,15 +322,6 @@ Matplotlib 결과 창을 함께 확인하려면 다음을 사용한다.
 python run_single_comparison.py --show
 ```
 
-각 알고리즘을 단독으로 실행할 수도 있다.
-
-```bash
-python run_aco.py
-python run_ga.py
-python run_gwo.py
-python run_pso.py
-```
-
 ### Dependencies
 
 ```text
