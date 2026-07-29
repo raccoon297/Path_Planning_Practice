@@ -116,11 +116,16 @@ q_{rand} \sim \mathcal{U}(\mathcal{X})
 $$
 
 $$
-q_{near}=\underset{q\in T}{\operatorname{argmin}}\;d(q,q_{rand})
+q_{\mathrm{near}}
+=
+\underset{q \in T}{\mathrm{arg\,min}}
+\; d(q, q_{\mathrm{rand}})
 $$
 
 $$
-q_{new}=\operatorname{Steer}(q_{near},q_{rand},\Delta q)
+q_{\mathrm{new}}
+=
+\mathrm{Steer}(q_{\mathrm{near}}, q_{\mathrm{rand}}, \Delta q)
 $$
 
 #### 구현 방식
