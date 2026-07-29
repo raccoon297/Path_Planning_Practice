@@ -111,22 +111,27 @@ $$
 
 RRT는 탐색 공간에서 무작위 상태를 샘플링하고, 기존 트리에서 가장 가까운 노드로부터 샘플 방향으로 새로운 가지를 확장한다.
 
-$$
-q_{rand} \sim \mathcal{U}(\mathcal{X})
-$$
+```math
+q_{\mathrm{rand}} \sim U(X)
+```
 
-$$
+```math
 q_{\mathrm{near}}
 =
 \underset{q \in T}{\mathrm{arg\,min}}
-\; d(q, q_{\mathrm{rand}})
-$$
+\, d(q, q_{\mathrm{rand}})
+```
 
-$$
+```math
 q_{\mathrm{new}}
 =
-\mathrm{Steer}(q_{\mathrm{near}}, q_{\mathrm{rand}}, \Delta q)
-$$
+\mathrm{Steer}
+\left(
+q_{\mathrm{near}},
+q_{\mathrm{rand}},
+\Delta q
+\right)
+```
 
 #### 구현 방식
 
