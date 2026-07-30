@@ -2,6 +2,14 @@
 
 > ACO, GA, GWO, PSO를 이용해 세 에이전트의 공간 경로와 출발 시각을 함께 최적화하는 중앙집중식 다중 에이전트 경로 계획 시뮬레이션이다.
 
+## 1. 프로젝트 개요
+
+단일 에이전트 경로 계획에서는 장애물을 회피하는 하나의 경로만 탐색하면 된다. 다중 에이전트 환경에서는 각 에이전트가 장애물을 피하는 동시에, 같은 공간을 비슷한 시각에 점유하여 발생하는 에이전트 간 충돌도 방지해야 한다.
+
+본 프로젝트는 서로 다른 시작점과 목표점을 가진 세 에이전트를 하나의 중앙 계획기가 함께 다루는 **centralized cooperative path planning** 문제를 구성한다. 연속형 알고리즘인 GA, GWO, PSO는 세 에이전트의 waypoint와 출발 딜레이를 하나의 33차원 공동 후보로 최적화한다. ACO는 격자 경로와 시공간 예약 정보를 이용해 공동 계획을 순차적으로 구성한다.
+
+본 구현은 특정 논문의 수치 결과를 그대로 재현하는 프로젝트가 아니다. Multi-Agent Path Finding(MAPF), cooperative pathfinding, continuous-time collision avoidance, prioritized planning 및 다중 UAV 메타휴리스틱 연구의 핵심 개념을 분석한 뒤, 알고리즘 간 탐색 특성을 동일한 2차원 환경에서 비교할 수 있도록 축소·재구성한 연구 기반 시뮬레이션이다.
+
 <p align="center">
   <img src="results/comparison/comparison_joint_plans.png" alt="Joint plan comparison" width="100%">
 </p>
@@ -10,13 +18,6 @@
   <img src="results/comparison/comparison_start_delays.png" alt="Optimized start-delay comparison" width="92%">
 </p>
 
-## 1. 프로젝트 개요
-
-단일 에이전트 경로 계획에서는 장애물을 회피하는 하나의 경로만 탐색하면 된다. 다중 에이전트 환경에서는 각 에이전트가 장애물을 피하는 동시에, 같은 공간을 비슷한 시각에 점유하여 발생하는 에이전트 간 충돌도 방지해야 한다.
-
-본 프로젝트는 서로 다른 시작점과 목표점을 가진 세 에이전트를 하나의 중앙 계획기가 함께 다루는 **centralized cooperative path planning** 문제를 구성한다. 연속형 알고리즘인 GA, GWO, PSO는 세 에이전트의 waypoint와 출발 딜레이를 하나의 33차원 공동 후보로 최적화한다. ACO는 격자 경로와 시공간 예약 정보를 이용해 공동 계획을 순차적으로 구성한다.
-
-본 구현은 특정 논문의 수치 결과를 그대로 재현하는 프로젝트가 아니다. Multi-Agent Path Finding(MAPF), cooperative pathfinding, continuous-time collision avoidance, prioritized planning 및 다중 UAV 메타휴리스틱 연구의 핵심 개념을 분석한 뒤, 알고리즘 간 탐색 특성을 동일한 2차원 환경에서 비교할 수 있도록 축소·재구성한 연구 기반 시뮬레이션이다.
 
 ### 주요 구현 내용
 
