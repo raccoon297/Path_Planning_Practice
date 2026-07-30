@@ -1,0 +1,456 @@
+# Multi-Agent Path Planning
+
+> ACO, GA, GWO, PSO를 이용해 세 에이전트의 공간 경로와 출발 시각을 함께 최적화하는 중앙집중식 다중 에이전트 경로 계획 시뮬레이션이다.
+
+<p align="center">
+  <img src="results/comparison/comparison_joint_plans.png" alt="Joint plan comparison" width="100%">
+</p>
+
+<p align="center">
+  <img src="results/comparison/comparison_start_delays.png" alt="Optimized start-delay comparison" width="92%">
+</p>
+
+## 1. 프로젝트 개요
+
+단일 에이전트 경로 계획에서는 장애물을 회피하는 하나의 경로만 탐색하면 된다. 다중 에이전트 환경에서는 각 에이전트가 장애물을 피하는 동시에, 같은 공간을 비슷한 시각에 점유하여 발생하는 에이전트 간 충돌도 방지해야 한다.
+
+본 프로젝트는 서로 다른 시작점과 목표점을 가진 세 에이전트를 하나의 중앙 계획기가 함께 다루는 **centralized cooperative path planning** 문제를 구성한다. 연속형 알고리즘인 GA, GWO, PSO는 세 에이전트의 waypoint와 출발 딜레이를 하나의 33차원 공동 후보로 최적화한다. ACO는 격자 경로와 시공간 예약 정보를 이용해 공동 계획을 순차적으로 구성한다.
+
+본 구현은 특정 논문의 수치 결과를 그대로 재현하는 프로젝트가 아니다. Multi-Agent Path Finding(MAPF), cooperative pathfinding, continuous-time collision avoidance, prioritized planning 및 다중 UAV 메타휴리스틱 연구의 핵심 개념을 분석한 뒤, 알고리즘 간 탐색 특성을 동일한 2차원 환경에서 비교할 수 있도록 축소·재구성한 연구 기반 시뮬레이션이다.
+
+### 주요 구현 내용
+
+- 세 에이전트의 경로와 출발 딜레이를 함께 결정하는 공동 최적화
+- 장애물 충돌, 안전 여유, 에이전트 간 충돌과 최소 분리 거리 검증
+- 경로 길이, makespan, smoothness, backtracking 및 waypoint spacing을 포함한 목적함수
+- ACO, GA, GWO, PSO의 탐색 과정과 동시 이동 애니메이션
+- 동일 시나리오와 공통 지표를 이용한 단일 대표 실행 비교
+
+## 2. 문제 정의
+
+### 2.1 공통 환경
+
+| 항목 | 설정 |
+|---|---:|
+| 에이전트 수 | 3 |
+| 지도 크기 | `100 × 100` |
+| 정적 원형 장애물 | 4개 |
+| 에이전트당 waypoint | 5개 |
+| 연속형 공동 후보 차원 | 33 |
+| 이동 속도 | `5.0` |
+| 에이전트 반지름 | `1.0` |
+| 물리적 충돌 거리 | `2.0` |
+| 최소 에이전트 분리 거리 | `3.0` |
+| 최대 출발 딜레이 | `15.0 s` |
+| 장애물 안전 여유 | `3.0` |
+| 지도 경계 안전 여유 | `3.0` |
+| 최종 검증 시간 간격 | `0.1 s` |
+
+```text
+Agent 1: (5, 5)  → (95, 95)
+Agent 2: (10, 5) → (90, 95)
+Agent 3: (5, 10) → (95, 90)
+```
+
+```text
+Obstacle 1: center=(38, 42), radius=9
+Obstacle 2: center=(60, 24), radius=9
+Obstacle 3: center=(28, 68), radius=8
+Obstacle 4: center=(74, 55), radius=8
+```
+
+### 2.2 공동 계획 표현
+
+에이전트 `i`의 경로는 시작점, 다섯 개의 중간 waypoint, 목표점으로 표현한다.
+
+$$
+P_i=[s_i,w_{i,1},\ldots,w_{i,5},g_i]
+$$
+
+연속형 알고리즘의 후보 하나는 모든 에이전트의 waypoint 좌표와 출발 딜레이로 구성된다.
+
+$$
+D=N(2K+1)=3(2\times5+1)=33
+$$
+
+여기서 `N`은 에이전트 수, `K`는 에이전트당 waypoint 수다. 출발 딜레이에는 공통 시간 이동에 따른 중복 해를 제거하기 위해 다음 정규화를 적용한다.
+
+$$
+\tau_i'=\operatorname{clip}\left(\tau_i-\min_j\tau_j,0,\tau_{\max}\right)
+$$
+
+따라서 최소 한 에이전트는 항상 `0초`에 출발한다.
+
+### 2.3 시간 모델과 충돌 조건
+
+각 에이전트는 자신의 polyline을 일정한 속도 `v`로 이동한다. 출발 전에는 시작점에 머물며, 목표점 도착 후에는 목표점에 머문다.
+
+에이전트 `i`, `j`의 시간 `t`에서의 거리는 다음과 같다.
+
+$$
+d_{ij}(t)=\lVert q_i(t)-q_j(t)\rVert_2
+$$
+
+물리적 충돌과 운항 안전 조건은 서로 구분한다.
+
+$$
+d_{ij}(t)\ge 2r=2.0
+$$
+
+$$
+d_{ij}(t)\ge d_{\min}=3.0
+$$
+
+장애물 `o`에 대한 경로 선분의 clearance는 선분과 장애물 중심 사이의 최소 거리에서 장애물 반지름을 뺀 값으로 계산한다.
+
+$$
+c_{i,k,o}=\operatorname{dist}(\overline{p_{i,k}p_{i,k+1}},c_o)-R_o
+$$
+
+모든 선분은 장애물 표면에서 `3.0` 이상 떨어져야 하며, waypoint와 경로 선분은 지도 경계에서도 `3.0`의 안전 여유를 유지해야 한다.
+
+## 3. 공동 목적함수
+
+공통 목적함수는 경로 효율, 시간 효율, 장애물 안전성, 에이전트 간 안전성과 경로 품질을 하나의 비용으로 결합한다.
+
+$$
+\begin{aligned}
+J={}&w_LJ_L+w_{oc}J_{oc}+w_{om}J_{om}\\
+&+w_{ac}J_{ac}+w_{as}J_{as}+w_sJ_s\\
+&+w_{bt}J_{bt}+w_{ws}J_{ws}+w_bJ_b\\
+&+w_dJ_d+w_mJ_m
+\end{aligned}
+$$
+
+| 목적함수 항 | 의미 | 가중치 |
+|---|---|---:|
+| `J_L` | 전체 경로 길이 | `1` |
+| `J_oc` | 장애물 충돌 | `10,000` |
+| `J_om` | 장애물 안전 여유 위반 | `100` |
+| `J_ac` | 에이전트 간 물리적 충돌 | `15,000` |
+| `J_as` | 최소 분리 거리 위반 | `500` |
+| `J_s` | 회전각 기반 smoothness | `5` |
+| `J_bt` | 목표 반대 방향 backtracking | `100` |
+| `J_ws` | waypoint 진행도 불균형 | `200` |
+| `J_b` | 지도 경계 위반 | `10,000` |
+| `J_d` | 출발 딜레이 합 | `1` |
+| `J_m` | makespan | `2` |
+
+전체 경로 길이와 makespan은 다음과 같이 계산한다.
+
+$$
+L_{\text{total}}=\sum_i\sum_k\lVert p_{i,k+1}-p_{i,k}\rVert_2
+$$
+
+$$
+T_{\text{makespan}}=\max_i\left(\tau_i+\frac{L_i}{v}\right)
+$$
+
+자유로운 실수 waypoint를 사용하는 GA, GWO, PSO에는 backtracking과 waypoint spacing 정규화를 적용한다. ACO는 인접 격자 이동과 line-of-sight simplification으로 경로 순서가 구조적으로 결정되므로 두 항목을 최적화 비용에 사용하지 않는다. 따라서 알고리즘별 목적함수 절댓값은 직접 비교하지 않고, 최종 비교에는 성공 여부와 공통 물리 지표를 사용한다.
+
+정확한 가중치는 논문에서 고정된 상수가 아니라 본 시뮬레이션을 위한 실험 파라미터다.
+
+## 4. 구현 알고리즘
+
+### 4.1 Ant Colony Optimization
+
+ACO는 연속형 33차원 후보 대신 `21 × 21`의 8-connected grid에서 공동 계획을 구성한다. Joint ant 하나가 에이전트 우선순위를 정하고, 먼저 생성한 경로를 시공간 예약 정보로 저장한 뒤 다음 에이전트의 경로와 딜레이를 선택한다.
+
+격자 간선의 선택 확률은 pheromone, 목표 heuristic과 reservation factor를 결합한다.
+
+$$
+P_{uv}^{(i)}\propto
+\left(\tau_{uv}^{(i)}\right)^\alpha
+\left(\eta_{uv}^{(i)}\right)^\beta
+R_{uv}^{(i)}(t)
+$$
+
+완성된 격자 경로에는 장애물 clearance를 유지하는 line-of-sight simplification을 적용한다. 대표 실행에서 ACO는 가장 짧은 전체 경로와 makespan, 가장 작은 출발 딜레이 합을 기록했다.
+
+<table>
+  <tr>
+    <th width="50%">Search Evolution</th>
+    <th width="50%">Synchronized Motion</th>
+  </tr>
+  <tr>
+    <td><img src="results/aco/aco_search_evolution.gif" alt="ACO search evolution" width="100%"></td>
+    <td><img src="results/aco/aco_joint_motion.gif" alt="ACO synchronized motion" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center">Pheromone reinforcement and reservation-aware path construction</td>
+    <td align="center">Collision-free execution with compact spatial and temporal coordination</td>
+  </tr>
+</table>
+
+```bash
+python run_aco.py
+```
+
+### 4.2 Genetic Algorithm
+
+Chromosome 하나가 세 에이전트의 waypoint와 출발 딜레이를 모두 포함한다. 세대마다 fitness evaluation, tournament selection, structured crossover, Gaussian mutation, elite survival을 수행한다.
+
+공동 계획의 구조를 보존하기 위해 두 종류의 교차 연산을 사용한다.
+
+- `agent-level crossover`: 특정 에이전트의 waypoint와 딜레이 블록 전체를 교환한다.
+- `waypoint-level crossover`: 에이전트 내부의 연속 waypoint 구간과 딜레이 gene을 교환한다.
+
+경로 좌표와 시간 gene은 단위와 범위가 다르므로 서로 다른 mutation scale을 사용한다. 대표 실행에서 GA는 가장 낮은 smoothness cost를 기록하고 ACO에 근접한 경로 길이와 makespan을 보였다.
+
+<table>
+  <tr>
+    <th width="50%">Search Evolution</th>
+    <th width="50%">Synchronized Motion</th>
+  </tr>
+  <tr>
+    <td><img src="results/ga/ga_search_evolution.gif" alt="GA search evolution" width="100%"></td>
+    <td><img src="results/ga/ga_joint_motion.gif" alt="GA synchronized motion" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center">Population evolution through selection, structured crossover, and mutation</td>
+    <td align="center">Smooth coordinated motion generated by the evolved joint plan</td>
+  </tr>
+</table>
+
+```bash
+python run_ga.py
+```
+
+### 4.3 Grey Wolf Optimizer
+
+Wolf 하나가 하나의 완전한 공동 계획을 나타낸다. Alpha, Beta, Delta가 다른 wolf의 탐색 방향을 결정한다.
+
+$$
+D_{\alpha}=\lvert C_1X_{\alpha}-X\rvert,\qquad
+X_1=X_{\alpha}-A_1D_{\alpha}
+$$
+
+Beta와 Delta에 대해서도 같은 계산을 수행한 뒤 다음 위치를 결정한다.
+
+$$
+X^{t+1}=\frac{X_1+X_2+X_3}{3}
+$$
+
+본 구현은 탐색 중 발견된 최고 세 해를 best-so-far leader archive로 유지한다. 지도 밖으로 벗어난 좌표를 경계에 고정하는 clipping 대신 reflection repair를 적용하여 boundary 고착을 줄였다. 대표 실행에서는 모든 안전 조건을 만족했지만 다른 알고리즘보다 더 긴 우회와 큰 출발 딜레이를 선택했다.
+
+<table>
+  <tr>
+    <th width="50%">Search Evolution</th>
+    <th width="50%">Synchronized Motion</th>
+  </tr>
+  <tr>
+    <td><img src="results/gwo/gwo_search_evolution.gif" alt="GWO search evolution" width="100%"></td>
+    <td><img src="results/gwo/gwo_joint_motion.gif" alt="GWO synchronized motion" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center">Alpha, Beta, and Delta leaders guide the full joint plan</td>
+    <td align="center">Feasible execution using larger spatial detours and temporal separation</td>
+  </tr>
+</table>
+
+```bash
+python run_gwo.py
+```
+
+### 4.4 Particle Swarm Optimization
+
+Particle 하나가 세 에이전트의 전체 공동 계획을 나타낸다. 표준 PSO의 속도와 위치 갱신식을 33차원 공동 후보에 적용한다.
+
+$$
+v_i^{t+1}=\omega v_i^t+c_1r_1(p_i^t-x_i^t)+c_2r_2(g^t-x_i^t)
+$$
+
+$$
+x_i^{t+1}=x_i^t+v_i^{t+1}
+$$
+
+각 particle은 자신의 `pbest`와 swarm의 `gbest`를 이용해 세 경로와 세 출발 딜레이를 동시에 갱신한다. 초기 swarm에는 직선 경로, 곡선형 corridor 경로와 무작위 후보를 함께 사용한다. 대표 실행에서 PSO는 네 알고리즘 중 가장 큰 최소 에이전트 거리를 확보했다.
+
+<table>
+  <tr>
+    <th width="50%">Search Evolution</th>
+    <th width="50%">Synchronized Motion</th>
+  </tr>
+  <tr>
+    <td><img src="results/pso/pso_search_evolution.gif" alt="PSO search evolution" width="100%"></td>
+    <td><img src="results/pso/pso_joint_motion.gif" alt="PSO synchronized motion" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center">Particles update joint paths and delays using personal and global best plans</td>
+    <td align="center">Conservative coordination with the largest inter-agent clearance</td>
+  </tr>
+</table>
+
+```bash
+python run_pso.py
+```
+
+## 5. 대표 결과
+
+아래 결과는 동일한 시나리오와 `seed=42`에서 얻은 단일 대표 실행이다. 경로 길이, makespan, planning time과 출발 딜레이 합은 작을수록 효율적이며, 최소 에이전트 거리는 기준값 `3.0` 이상이어야 한다.
+
+| Algorithm | Success | Path length | Makespan | Planning time | Min agent distance | Sum of delays |
+|---|---:|---:|---:|---:|---:|---:|
+| ACO | True | **378.339** | **27.010 s** | **7.257 s** | 3.344 | **2.000 s** |
+| GA | True | 384.031 | 28.347 s | 10.783 s | 3.905 | 4.206 s |
+| GWO | True | 424.562 | 36.955 s | 10.350 s | 3.289 | 9.548 s |
+| PSO | True | 392.966 | 31.603 s | 10.144 s | **4.605** | 5.540 s |
+
+모든 최종 계획은 다음 조건을 만족했다.
+
+```text
+Obstacle collisions          : 0
+Obstacle margin violations   : 0
+Inter-agent collisions       : 0
+Separation violations        : 0
+Boundary margin violations   : 0
+Backtracking cost            : 0
+```
+
+<p align="center">
+  <img src="results/comparison/comparison_metrics.png" alt="Metric comparison" width="100%">
+</p>
+
+### 결과 해석
+
+- **ACO**는 가장 짧은 전체 경로와 makespan, 가장 작은 출발 딜레이 합을 기록했다. 격자 기반 constructive search와 예약 정보가 현재 장애물 배치에 가장 잘 맞은 결과다.
+- **GA**는 ACO에 근접한 경로 길이와 makespan을 보였으며, 가장 낮은 smoothness cost로 매끄러운 연속형 경로를 생성했다.
+- **PSO**는 네 알고리즘 중 가장 큰 최소 에이전트 거리를 확보했다. 더 긴 실행 시간과 출발 지연을 사용하는 대신 보수적인 공간·시간 분리를 선택했다.
+- **GWO**도 모든 안전 조건을 만족했지만, 더 긴 우회와 가장 큰 출발 딜레이 합을 사용했다. leader archive와 reflection repair를 통해 초기 구현에서 나타났던 경계 고착과 waypoint 밀집은 완화했다.
+
+Planning time은 후보 하나의 계산 비용과 평가 횟수가 서로 다르므로 알고리즘 복잡도의 절대적인 순위로 해석할 수 없다. ACO의 joint ant는 격자 경로 생성, 우선순위, 출발 딜레이와 예약 검사를 함께 수행하며, GA·GWO·PSO는 33차원 공동 후보를 반복 평가한다.
+
+또한 본 결과는 하나의 시나리오와 하나의 seed에서 얻은 대표 사례다. 알고리즘의 일반적인 우열을 주장하려면 여러 seed와 다양한 시나리오를 사용한 통계적 benchmark가 별도로 필요하다.
+
+## 6. 실행 방법
+
+### 6.1 설치
+
+```bash
+pip install -r requirements.txt
+```
+
+### 6.2 개별 알고리즘 실행
+
+```bash
+python run_aco.py
+python run_ga.py
+python run_gwo.py
+python run_pso.py
+```
+
+GIF 생성을 생략하고 정적 결과와 JSON만 갱신할 수 있다.
+
+```bash
+python run_aco.py --skip-gifs
+python run_ga.py --skip-gifs
+python run_gwo.py --skip-gifs
+python run_pso.py --skip-gifs
+```
+
+### 6.3 통합 비교
+
+기존 결과 JSON을 검증하고 비교 산출물을 생성한다.
+
+```bash
+python run_comparison.py
+```
+
+결과 JSON이 아직 없거나 네 알고리즘을 같은 seed로 다시 실행하려면 다음 명령을 사용한다.
+
+```bash
+python run_comparison.py --rerun --seed 42
+```
+
+비교 스크립트는 JSON에 저장된 시나리오, 시작점, 목표점과 metric schema가 현재 코드와 일치하는지 확인한다. 누락된 결과나 다른 시나리오의 오래된 결과가 섞여 있으면 비교를 중단한다.
+
+## 7. 결과 파일
+
+| Algorithm | Final plan | Synchronized motion | Search evolution | Convergence |
+|---|---|---|---|---|
+| ACO | [PNG](results/aco/aco_joint_plan.png) | [GIF](results/aco/aco_joint_motion.gif) | [GIF](results/aco/aco_search_evolution.gif) | [PNG](results/aco/aco_convergence.png) |
+| GA | [PNG](results/ga/ga_joint_plan.png) | [GIF](results/ga/ga_joint_motion.gif) | [GIF](results/ga/ga_search_evolution.gif) | [PNG](results/ga/ga_convergence.png) |
+| GWO | [PNG](results/gwo/gwo_joint_plan.png) | [GIF](results/gwo/gwo_joint_motion.gif) | [GIF](results/gwo/gwo_search_evolution.gif) | [PNG](results/gwo/gwo_convergence.png) |
+| PSO | [PNG](results/pso/pso_joint_plan.png) | [GIF](results/pso/pso_joint_motion.gif) | [GIF](results/pso/pso_search_evolution.gif) | [PNG](results/pso/pso_convergence.png) |
+
+통합 비교 산출물은 `results/comparison/`에 저장된다.
+
+```text
+comparison_joint_plans.png
+comparison_metrics.png
+comparison_start_delays.png
+comparison_table.csv
+comparison_summary.json
+```
+
+## 8. 프로젝트 구조
+
+```text
+04_Multi_Agent_Path_Planning/
+├─ config/
+│  └─ scenario.py
+├─ optimizers/
+│  ├─ aco.py
+│  ├─ ga.py
+│  ├─ gwo.py
+│  └─ pso.py
+├─ utils/
+│  ├─ collision.py
+│  ├─ metrics.py
+│  ├─ objective.py
+│  ├─ path_utils.py
+│  ├─ reporting.py
+│  └─ visualization.py
+├─ tests/
+│  ├─ test_aco.py
+│  ├─ test_common_components.py
+│  ├─ test_comparison.py
+│  ├─ test_ga.py
+│  ├─ test_gwo.py
+│  └─ test_pso.py
+├─ results/
+│  ├─ aco/
+│  ├─ comparison/
+│  ├─ ga/
+│  ├─ gwo/
+│  └─ pso/
+├─ run_aco.py
+├─ run_comparison.py
+├─ run_ga.py
+├─ run_gwo.py
+├─ run_pso.py
+└─ requirements.txt
+```
+
+## 9. 테스트
+
+프로젝트 루트에서 다음 명령을 실행한다.
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+공통 환경, 충돌 판정, 경계 제약, 경로 정규화, 네 최적화 알고리즘과 비교 결과 검증을 포함한 **29개 테스트**가 구성되어 있다.
+
+## 10. 프로젝트 범위와 한계
+
+- 2차원 정적 원형 장애물 환경을 사용한다.
+- 모든 에이전트는 같은 일정 속도로 이동한다.
+- 중앙 계획기가 모든 경로와 출발 시각을 오프라인으로 결정한다.
+- 충돌 검증은 `0.1초` 간격의 공통 시간축을 사용하므로 엄밀한 해석적 continuous-time collision detection의 근사다.
+- 실제 UAV의 가속도, 최대 회전율, 에너지, 통신 단절과 동적 장애물은 포함하지 않는다.
+- 특정 논문의 완전한 재현이나 대규모 MAPF benchmark를 목표로 하지 않는다.
+
+## 11. 참고문헌
+
+1. R. Stern et al., “Multi-Agent Pathfinding: Definitions, Variants, and Benchmarks,” *Proceedings of the International Symposium on Combinatorial Search*, vol. 10, no. 1, pp. 151–158, 2021. [DOI](https://doi.org/10.1609/socs.v10i1.18510)
+2. D. Silver, “Cooperative Pathfinding,” *Proceedings of the AAAI Conference on Artificial Intelligence and Interactive Digital Entertainment*, vol. 1, no. 1, pp. 117–122, 2005. [DOI](https://doi.org/10.1609/aiide.v1i1.18726)
+3. M. Phillips and M. Likhachev, “SIPP: Safe Interval Path Planning for Dynamic Environments,” *IEEE International Conference on Robotics and Automation*, pp. 5628–5635, 2011. [DOI](https://doi.org/10.1109/ICRA.2011.5980306)
+4. A. Andreychuk, K. Yakovlev, D. Atzmon, and R. Stern, “Multi-Agent Pathfinding with Continuous Time,” *Proceedings of IJCAI*, pp. 39–45, 2019. [DOI](https://doi.org/10.24963/ijcai.2019/6)
+5. J. Kennedy and R. Eberhart, “Particle Swarm Optimization,” *Proceedings of ICNN*, vol. 4, pp. 1942–1948, 1995. [DOI](https://doi.org/10.1109/ICNN.1995.488968)
+6. Z. Shao, F. Yan, Z. Zhou, and X. Zhu, “Path Planning for Multi-UAV Formation Rendezvous Based on Distributed Cooperative Particle Swarm Optimization,” *Applied Sciences*, vol. 9, no. 13, 2621, 2019. [DOI](https://doi.org/10.3390/app9132621)
+7. Y. Eun and H. Bang, “Cooperative Task Assignment/Path Planning of Multiple Unmanned Aerial Vehicles Using Genetic Algorithms,” *Journal of Aircraft*, vol. 46, no. 1, pp. 338–343, 2009. [DOI](https://doi.org/10.2514/1.38510)
+8. S. Mirjalili, S. M. Mirjalili, and A. Lewis, “Grey Wolf Optimizer,” *Advances in Engineering Software*, vol. 69, pp. 46–61, 2014. [DOI](https://doi.org/10.1016/j.advengsoft.2013.12.007)
+9. M. Radmanesh, M. Kumar, P. H. Guentert, and M. Sarim, “Grey Wolf Optimization Based Sense and Avoid Algorithm in a Bayesian Framework for Multiple UAV Path Planning in an Uncertain Environment,” *Aerospace Science and Technology*, vol. 77, pp. 168–179, 2018. [DOI](https://doi.org/10.1016/j.ast.2018.02.031)
+10. M. Dorigo and L. M. Gambardella, “Ant Colony System: A Cooperative Learning Approach to the Traveling Salesman Problem,” *IEEE Transactions on Evolutionary Computation*, vol. 1, no. 1, pp. 53–66, 1997. [DOI](https://doi.org/10.1109/4235.585892)
+11. Y. Zhang, F. Wang, F. Fu, and Z. Su, “Multi-AGV Path Planning for Indoor Factory by Using Prioritized Planning and Improved Ant Algorithm,” *Journal of Engineering and Technological Sciences*, vol. 50, no. 4, pp. 534–547, 2018. [DOI](https://doi.org/10.5614/j.eng.technol.sci.2018.50.4.6)
