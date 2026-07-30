@@ -184,7 +184,7 @@ $$
 
 ## 4. 실험 결과
 
-아래 결과는 동일한 시나리오와 `seed=42`에서 얻은 단일 대표 실행이다. 최종 평가는 학습 마지막 model이 아니라, 성공한 deterministic evaluation checkpoint 중 return이 가장 높았던 `best_model.pt`를 사용하였다.
+아래 결과는 동일한 시나리오와 `seed=42`에서 얻은 단일 대표 실행이다. 최종 평가는 성공한 deterministic evaluation checkpoint 중 return이 가장 높았던 `best_model.pt`를 사용하였다.
 
 | 지표 | DQN | PPO |
 |---|---:|---:|
