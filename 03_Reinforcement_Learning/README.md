@@ -335,5 +335,8 @@ python -m pytest -q
 1. V. Mnih et al., “Human-level control through deep reinforcement learning,” *Nature*, vol. 518, pp. 529–533, 2015. [DOI](https://doi.org/10.1038/nature14236)
 2. J. Schulman, P. Moritz, S. Levine, M. Jordan, and P. Abbeel, “High-Dimensional Continuous Control Using Generalized Advantage Estimation,” 2015. [arXiv](https://arxiv.org/abs/1506.02438)
 3. J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal Policy Optimization Algorithms,” 2017. [arXiv](https://arxiv.org/abs/1707.06347)
-4. O. Bouhamed, H. Ghazzai, H. Besbes, and Y. Massoud, “Autonomous UAV Navigation: A DDPG-based Deep Reinforcement Learning Approach,” 2020. [arXiv](https://arxiv.org/abs/2003.10923)
-5. S. Mysore, B. Mabsout, R. Mancuso, and K. Saenko, “Regularizing Action Policies for Smooth Control with Reinforcement Learning,” 2020. [arXiv](https://arxiv.org/abs/2012.06644)
+4. S. Mysore, B. Mabsout, R. Mancuso, and K. Saenko, “Regularizing Action Policies for Smooth Control with Reinforcement Learning,” 2020. [arXiv](https://arxiv.org/abs/2012.06644)
+5. J. Yao, X. Li, Y. Zhang, J. Ji, Y. Wang, and Y. Liu, “Path Planning of Unmanned Helicopter in Complex Dynamic Environment Based on State-Coded Deep Q-Network,” 2022. [DOI](https://doi.org/10.3390/sym14050856)
+6. G. Farid, M. Bilal, L. Zhang, A. Alharbi, I. Ahmed, and M. Azhar, “An Improved Deep Q-Learning Approach for Navigation of an Autonomous UAV Agent in 3D Obstacle-Cluttered Environment,” 2025. [DOI](https://doi.org/10.3390/drones9080518)
+7. F. Marino and G. Guglieri, “Beyond Static Obstacles: Integrating Kalman Filter with Reinforcement Learning for Drone Navigation,” 2024. [DOI](https://doi.org/10.3390/aerospace11050395)
+
