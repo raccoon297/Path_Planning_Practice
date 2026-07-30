@@ -11,7 +11,7 @@ DQN은 `±X`, `±Y`, `±Z`의 여섯 방향 중 하나를 선택해 고정 거�
 특정 논문의 수치 결과를 그대로 재현한 것이 아니라, 3차원 UAV navigation과 deep reinforcement learning 연구의 문제 정의와 핵심 알고리즘을 학습·비교·시각화가 가능한 규모로 축소하고 재구성한 연구 기반 시뮬레이션 프로젝트다.
 
 <p align="center">
-  <img src="results/comparison/trajectory_comparison.png" alt="DQN and PPO 3D trajectory comparison" width="1000">
+  <img src="results/comparison/trajectory_comparison.png" alt="DQN and PPO 3D trajectory comparison" width="600">
 </p>
 
 ### 주요 구현 내용
@@ -177,7 +177,7 @@ $$
 구현 파일: [`agents/ppo.py`](agents/ppo.py)
 
 <p align="center">
-  <img src="results/comparison/navigation_comparison.gif" alt="DQN and PPO navigation comparison" width="850">
+  <img src="results/comparison/navigation_comparison.gif" alt="DQN and PPO navigation comparison" width="700">
 </p>
 
 ---
