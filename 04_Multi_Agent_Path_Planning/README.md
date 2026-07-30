@@ -18,7 +18,6 @@
   <img src="results/comparison/comparison_start_delays.png" alt="Optimized start-delay comparison" width="92%">
 </p>
 
-
 ### 주요 구현 내용
 
 - 세 에이전트의 경로와 출발 딜레이를 함께 결정하는 공동 최적화
@@ -77,7 +76,7 @@ $$
 여기서 `N`은 에이전트 수, `K`는 에이전트당 waypoint 수다. 출발 딜레이에는 공통 시간 이동에 따른 중복 해를 제거하기 위해 다음 정규화를 적용한다.
 
 $$
-\tau_i'=\operatorname{clip}\left(\tau_i-\min_j\tau_j,0,\tau_{\max}\right)
+\tau_i'=\mathrm{clip}\left(\tau_i-\min_j\tau_j,0,\tau_{\max}\right)
 $$
 
 따라서 최소 한 에이전트는 항상 `0초`에 출발한다.
@@ -105,7 +104,7 @@ $$
 장애물 `o`에 대한 경로 선분의 clearance는 선분과 장애물 중심 사이의 최소 거리에서 장애물 반지름을 뺀 값으로 계산한다.
 
 $$
-c_{i,k,o}=\operatorname{dist}(\overline{p_{i,k}p_{i,k+1}},c_o)-R_o
+c_{i,k,o}=\mathrm{dist}(\overline{p_{i,k}p_{i,k+1}},c_o)-R_o
 $$
 
 모든 선분은 장애물 표면에서 `3.0` 이상 떨어져야 하며, waypoint와 경로 선분은 지도 경계에서도 `3.0`의 안전 여유를 유지해야 한다.
@@ -297,31 +296,12 @@ python run_pso.py
 | GWO | True | 424.562 | 36.955 s | 10.350 s | 3.289 | 9.548 s |
 | PSO | True | 392.966 | 31.603 s | 10.144 s | **4.605** | 5.540 s |
 
-모든 최종 계획은 다음 조건을 만족했다.
-
-```text
-Obstacle collisions          : 0
-Obstacle margin violations   : 0
-Inter-agent collisions       : 0
-Separation violations        : 0
-Boundary margin violations   : 0
-Backtracking cost            : 0
-```
-
-<p align="center">
-  <img src="results/comparison/comparison_metrics.png" alt="Metric comparison" width="100%">
-</p>
 
 ### 결과 해석
 
-- **ACO**는 가장 짧은 전체 경로와 makespan, 가장 작은 출발 딜레이 합을 기록했다. 격자 기반 constructive search와 예약 정보가 현재 장애물 배치에 가장 잘 맞은 결과다.
-- **GA**는 ACO에 근접한 경로 길이와 makespan을 보였으며, 가장 낮은 smoothness cost로 매끄러운 연속형 경로를 생성했다.
-- **PSO**는 네 알고리즘 중 가장 큰 최소 에이전트 거리를 확보했다. 더 긴 실행 시간과 출발 지연을 사용하는 대신 보수적인 공간·시간 분리를 선택했다.
-- **GWO**도 모든 안전 조건을 만족했지만, 더 긴 우회와 가장 큰 출발 딜레이 합을 사용했다. leader archive와 reflection repair를 통해 초기 구현에서 나타났던 경계 고착과 waypoint 밀집은 완화했다.
+모든 알고리즘은 장애물, 지도 경계 및 에이전트 간 충돌 제약을 만족하였다. 단일 대표 실행에서 ACO는 가장 짧은 전체 경로와 makespan을 기록했고, GA는 가장 매끄러운 연속형 경로를 생성했다. PSO는 가장 큰 에이전트 간 최소 거리를 확보했으며, GWO는 더 긴 우회와 출발 지연을 사용해 안전한 공동 계획을 구성했다.
 
-Planning time은 후보 하나의 계산 비용과 평가 횟수가 서로 다르므로 알고리즘 복잡도의 절대적인 순위로 해석할 수 없다. ACO의 joint ant는 격자 경로 생성, 우선순위, 출발 딜레이와 예약 검사를 함께 수행하며, GA·GWO·PSO는 33차원 공동 후보를 반복 평가한다.
-
-또한 본 결과는 하나의 시나리오와 하나의 seed에서 얻은 대표 사례다. 알고리즘의 일반적인 우열을 주장하려면 여러 seed와 다양한 시나리오를 사용한 통계적 benchmark가 별도로 필요하다.
+Planning time은 후보 생성 방식과 평가 횟수가 서로 다르므로 알고리즘 복잡도의 절대적인 순위로 해석하지 않는다. 또한 이 결과는 하나의 시나리오와 `seed=42`에서 얻은 대표 사례이며, 일반적인 우열을 판단하려면 여러 seed와 다양한 시나리오를 사용한 통계적 benchmark가 필요하다.
 
 ## 6. 실행 방법
 
@@ -378,7 +358,6 @@ python run_comparison.py --rerun --seed 42
 
 ```text
 comparison_joint_plans.png
-comparison_metrics.png
 comparison_start_delays.png
 comparison_table.csv
 comparison_summary.json
