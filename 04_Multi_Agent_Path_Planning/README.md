@@ -345,25 +345,8 @@ python run_comparison.py --rerun --seed 42
 
 비교 스크립트는 JSON에 저장된 시나리오, 시작점, 목표점과 metric schema가 현재 코드와 일치하는지 확인한다. 누락된 결과나 다른 시나리오의 오래된 결과가 섞여 있으면 비교를 중단한다.
 
-## 7. 결과 파일
 
-| Algorithm | Final plan | Synchronized motion | Search evolution | Convergence |
-|---|---|---|---|---|
-| ACO | [PNG](results/aco/aco_joint_plan.png) | [GIF](results/aco/aco_joint_motion.gif) | [GIF](results/aco/aco_search_evolution.gif) | [PNG](results/aco/aco_convergence.png) |
-| GA | [PNG](results/ga/ga_joint_plan.png) | [GIF](results/ga/ga_joint_motion.gif) | [GIF](results/ga/ga_search_evolution.gif) | [PNG](results/ga/ga_convergence.png) |
-| GWO | [PNG](results/gwo/gwo_joint_plan.png) | [GIF](results/gwo/gwo_joint_motion.gif) | [GIF](results/gwo/gwo_search_evolution.gif) | [PNG](results/gwo/gwo_convergence.png) |
-| PSO | [PNG](results/pso/pso_joint_plan.png) | [GIF](results/pso/pso_joint_motion.gif) | [GIF](results/pso/pso_search_evolution.gif) | [PNG](results/pso/pso_convergence.png) |
-
-통합 비교 산출물은 `results/comparison/`에 저장된다.
-
-```text
-comparison_joint_plans.png
-comparison_start_delays.png
-comparison_table.csv
-comparison_summary.json
-```
-
-## 8. 프로젝트 구조
+## 7. 프로젝트 구조
 
 ```text
 04_Multi_Agent_Path_Planning/
@@ -402,7 +385,7 @@ comparison_summary.json
 └─ requirements.txt
 ```
 
-## 9. 테스트
+## 8. 테스트
 
 프로젝트 루트에서 다음 명령을 실행한다.
 
@@ -412,7 +395,7 @@ python -m unittest discover -s tests -v
 
 공통 환경, 충돌 판정, 경계 제약, 경로 정규화, 네 최적화 알고리즘과 비교 결과 검증을 포함한 **29개 테스트**가 구성되어 있다.
 
-## 10. 프로젝트 범위와 한계
+## 9. 프로젝트 범위와 한계
 
 - 2차원 정적 원형 장애물 환경을 사용한다.
 - 모든 에이전트는 같은 일정 속도로 이동한다.
@@ -421,7 +404,7 @@ python -m unittest discover -s tests -v
 - 실제 UAV의 가속도, 최대 회전율, 에너지, 통신 단절과 동적 장애물은 포함하지 않는다.
 - 특정 논문의 완전한 재현이나 대규모 MAPF benchmark를 목표로 하지 않는다.
 
-## 11. 참고문헌
+## 10. 참고문헌
 
 1. R. Stern et al., “Multi-Agent Pathfinding: Definitions, Variants, and Benchmarks,” *Proceedings of the International Symposium on Combinatorial Search*, vol. 10, no. 1, pp. 151–158, 2021. [DOI](https://doi.org/10.1609/socs.v10i1.18510)
 2. D. Silver, “Cooperative Pathfinding,” *Proceedings of the AAAI Conference on Artificial Intelligence and Interactive Digital Entertainment*, vol. 1, no. 1, pp. 117–122, 2005. [DOI](https://doi.org/10.1609/aiide.v1i1.18726)
