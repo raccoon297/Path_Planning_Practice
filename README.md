@@ -43,6 +43,7 @@
       <p>
         ACO, GA, GWO와 PSO가 동일한 목적함수에서 후보 경로를 생성하고 개선하는 과정을 비교한다.
       </p>
+    </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
