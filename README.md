@@ -18,16 +18,7 @@
   </a>
 </p>
 
-<table>
-  <tr>
-    <td align="center" width="25%"><b>15.9%</b><br>Shorter Path<br><sub>PPO vs. DQN</sub></td>
-    <td align="center" width="25%"><b>98.1%</b><br>Lower Roughness<br><sub>continuous control</sub></td>
-    <td align="center" width="25%"><b>4 Families</b><br>Planning Paradigms<br><sub>classical to multi-agent</sub></td>
-    <td align="center" width="25%"><b>10 Algorithms</b><br>Implemented<br><sub>shared evaluation scenarios</sub></td>
-  </tr>
-</table>
-
-> 이 저장소는 단일 실행의 순위를 주장하기보다, 상태·행동 공간·목적함수와 탐색 메커니즘이 경로 특성에 미치는 차이를 구현과 시각화로 분석합니다.
+> 이 저장소는 상태·행동 공간·목적함수와 탐색 메커니즘이 경로 특성에 미치는 차이를 구현과 시각화로 분석하였다.
 
 ---
 
@@ -41,7 +32,7 @@
         <img src="01_Classical/results/dynamic/dstar_lite_replanning.gif" width="100%" alt="D star lite dynamic replanning">
       </a>
       <p>
-        A*, APF, RRT와 D* Lite를 공통 2차원 환경에서 비교하고, 숨겨진 장애물 발견 후 증분 재계획을 시각화합니다.
+        A*, APF, RRT와 D* Lite를 공통 2차원 환경에서 비교하고, 숨겨진 장애물 발견 후 경로 재계획을 시각화한다.
       </p>
     </td>
     <td width="50%" valign="top">
@@ -50,7 +41,7 @@
         <img src="02_Metaheuristics/results/single/ga_evolution.gif" width="100%" alt="Genetic Algorithm path evolution">
       </a>
       <p>
-        ACO, GA, GWO와 PSO가 동일한 목적함수에서 후보 경로를 생성하고 개선하는 과정을 비교합니다.
+        ACO, GA, GWO와 PSO가 동일한 목적함수에서 후보 경로를 생성하고 개선하는 과정을 비교한다.
       </p>
   </tr>
   <tr>
@@ -60,7 +51,7 @@
         <img src="03_Reinforcement_Learning/results/comparison/trajectory_comparison.png" width="100%" alt="DQN and PPO trajectory comparison">
       </a>
       <p>
-        DQN의 6방향 이산 이동과 PPO의 연속 가속도 제어가 만드는 3차원 궤적을 정량 비교합니다.
+        DQN의 6방향 이산 이동과 PPO의 연속 가속도 제어가 만드는 3차원 궤적을 정량 비교한다.
       </p>
     </td>
     <td width="50%" valign="top">
@@ -69,7 +60,7 @@
         <img src="04_Multi_Agent_Path_Planning/results/pso/pso_joint_motion.gif" width="100%" alt="PSO synchronized multi agent motion">
       </a>
       <p>
-        세 에이전트의 공간 경로와 출발 시각을 함께 최적화하고, 연속 시간에서 충돌과 최소 분리 거리를 검증합니다.
+        세 에이전트의 공간 경로와 출발 시각을 함께 최적화하고, 연속 시간에서 충돌과 최소 분리 거리를 검증한다.
       </p>
     </td>
   </tr>
@@ -99,7 +90,6 @@
 | Minimum clearance | 1.24 | **1.69** |
 | Trajectory roughness | 232.00 | **4.30** |
 
-PPO의 결과에는 알고리즘 차이뿐 아니라 연속 행동 공간과 point-mass dynamics 설계의 영향도 포함됩니다.
 
 ### Multi-Agent Joint Planning
 
@@ -110,7 +100,6 @@ PPO의 결과에는 알고리즘 차이뿐 아니라 연속 행동 공간과 poi
 | GWO | True | 424.562 | 36.955 s | 3.289 |
 | PSO | True | 392.966 | 31.603 s | **4.605** |
 
-결과는 동일 시나리오와 `seed=42`의 대표 실행이며, 일반적인 알고리즘 우열을 의미하지 않습니다.
 
 ---
 
