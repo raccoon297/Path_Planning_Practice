@@ -69,7 +69,7 @@
 
 ---
 
-## Projects at a Glance
+## Projects
 
 | 폴더 | 주제 | 구현 알고리즘 및 내용 |
 |---|---|---|
