@@ -1,14 +1,83 @@
+
+<div align="center">
+
 # Path Planning Practice
 
-> 고전 탐색, 메타휴리스틱, 강화학습, 다중 에이전트 최적화를 이용해 경로 계획 문제를 단계적으로 구현하고 비교한 프로젝트 모음이다.
+### Classical Search · Metaheuristic Optimization · Reinforcement Learning · Multi-Agent Planning
 
-## 1. 저장소 개요
+2차원 단일 에이전트 탐색부터 3차원 강화학습 제어와  
+다중 에이전트 시공간 공동 최적화까지 단계적으로 구현한 경로 계획 프로젝트 모음.
 
-본 저장소는 경로 계획 알고리즘의 핵심 원리와 구현 방식을 학습하기 위해 구성하였다. 각 프로젝트는 관련 선행연구의 문제 정의와 알고리즘 구조를 참고하되, 학습·비교·시각화가 가능한 규모의 공통 시뮬레이션으로 축소하고 재구성하였다.
 
-단일 에이전트의 2차원 경로 탐색에서 시작해 전역 최적화, 3차원 강화학습 제어, 다중 에이전트의 시공간 공동 계획으로 문제 범위를 확장한다. 세부 환경 설정, 알고리즘 수식, 실험 결과와 실행 방법은 각 폴더의 `README.md`에 정리되어 있다.
 
-## 2. 저장소 구성
+</div>
+
+<p align="center">
+  <a href="./03_Reinforcement_Learning">
+    <img src="03_Reinforcement_Learning/results/comparison/navigation_comparison.gif" width="850" alt="DQN and PPO path planning comparison in a 3D city environment">
+  </a>
+</p>
+
+<table>
+  <tr>
+    <td align="center" width="25%"><b>15.9%</b><br>Shorter Path<br><sub>PPO vs. DQN</sub></td>
+    <td align="center" width="25%"><b>98.1%</b><br>Lower Roughness<br><sub>continuous control</sub></td>
+    <td align="center" width="25%"><b>4 Families</b><br>Planning Paradigms<br><sub>classical to multi-agent</sub></td>
+    <td align="center" width="25%"><b>10 Algorithms</b><br>Implemented<br><sub>shared evaluation scenarios</sub></td>
+  </tr>
+</table>
+
+> 이 저장소는 단일 실행의 순위를 주장하기보다, 상태·행동 공간·목적함수와 탐색 메커니즘이 경로 특성에 미치는 차이를 구현과 시각화로 분석합니다.
+
+---
+
+## Project Gallery
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3 align="center"><a href="./01_Classical">01 · Classical Planning</a></h3>
+      <a href="./01_Classical">
+        <img src="01_Classical/results/dynamic/dstar_lite_replanning.gif" width="100%" alt="D star lite dynamic replanning">
+      </a>
+      <p>
+        A*, APF, RRT와 D* Lite를 공통 2차원 환경에서 비교하고, 숨겨진 장애물 발견 후 증분 재계획을 시각화합니다.
+      </p>
+    </td>
+    <td width="50%" valign="top">
+      <h3 align="center"><a href="./02_Metaheuristics">02 · Metaheuristic Planning</a></h3>
+      <a href="./02_Metaheuristics">
+        <img src="02_Metaheuristics/results/single/ga_evolution.gif" width="100%" alt="Genetic Algorithm path evolution">
+      </a>
+      <p>
+        ACO, GA, GWO와 PSO가 동일한 목적함수에서 후보 경로를 생성하고 개선하는 과정을 비교합니다.
+      </p>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3 align="center"><a href="./03_Reinforcement_Learning">03 · 3D Reinforcement Learning</a></h3>
+      <a href="./03_Reinforcement_Learning">
+        <img src="03_Reinforcement_Learning/results/comparison/trajectory_comparison.png" width="100%" alt="DQN and PPO trajectory comparison">
+      </a>
+      <p>
+        DQN의 6방향 이산 이동과 PPO의 연속 가속도 제어가 만드는 3차원 궤적을 정량 비교합니다.
+      </p>
+    </td>
+    <td width="50%" valign="top">
+      <h3 align="center"><a href="./04_Multi_Agent_Path_Planning">04 · Multi-Agent Planning</a></h3>
+      <a href="./04_Multi_Agent_Path_Planning">
+        <img src="04_Multi_Agent_Path_Planning/results/pso/pso_joint_motion.gif" width="100%" alt="PSO synchronized multi agent motion">
+      </a>
+      <p>
+        세 에이전트의 공간 경로와 출발 시각을 함께 최적화하고, 연속 시간에서 충돌과 최소 분리 거리를 검증합니다.
+      </p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## Projects at a Glance
 
 | 폴더 | 주제 | 구현 알고리즘 및 내용 |
 |---|---|---|
@@ -16,6 +85,36 @@
 | [`02_Metaheuristics`](02_Metaheuristics/) | Metaheuristic Path Planning | ACO, GA, GWO, PSO를 이용한 단일 에이전트 경로 최적화 |
 | [`03_Reinforcement_Learning`](03_Reinforcement_Learning/) | Reinforcement Learning Path Planning | DQN과 PPO를 이용한 3차원 도시 환경의 이산·연속 제어 비교 |
 | [`04_Multi_Agent_Path_Planning`](04_Multi_Agent_Path_Planning/) | Multi-Agent Path Planning | ACO, GA, GWO, PSO를 이용한 세 에이전트의 경로와 출발 시각 공동 최적화 |
+---
+
+## Representative Results
+
+### 3D Reinforcement Learning
+
+| Metric | DQN | PPO |
+|---|---:|---:|
+| Success | True | True |
+| Episode steps | 87 | **74** |
+| Path length | 174.00 | **146.30** |
+| Minimum clearance | 1.24 | **1.69** |
+| Trajectory roughness | 232.00 | **4.30** |
+
+PPO의 결과에는 알고리즘 차이뿐 아니라 연속 행동 공간과 point-mass dynamics 설계의 영향도 포함됩니다.
+
+### Multi-Agent Joint Planning
+
+| Algorithm | Success | Total Path | Makespan | Minimum Agent Distance |
+|---|---:|---:|---:|---:|
+| ACO | True | **378.339** | **27.010 s** | 3.344 |
+| GA | True | 384.031 | 28.347 s | 3.905 |
+| GWO | True | 424.562 | 36.955 s | 3.289 |
+| PSO | True | 392.966 | 31.603 s | **4.605** |
+
+결과는 동일 시나리오와 `seed=42`의 대표 실행이며, 일반적인 알고리즘 우열을 의미하지 않습니다.
+
+---
+
+## Repository Structure
 
 ```text
 Path_Planning_Practice/
@@ -25,3 +124,5 @@ Path_Planning_Practice/
 ├─ 04_Multi_Agent_Path_Planning/
 └─ README.md
 ```
+
+세부 문제 정의, 알고리즘 수식, 실험 설정, 실행 방법과 한계는 각 프로젝트 README에서 확인할 수 있습니다.
