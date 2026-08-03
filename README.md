@@ -78,30 +78,6 @@
 | [`04_Multi_Agent_Path_Planning`](04_Multi_Agent_Path_Planning/) | Multi-Agent Path Planning | ACO, GA, GWO, PSO를 이용한 세 에이전트의 경로와 출발 시각 공동 최적화 |
 ---
 
-## Representative Results
-
-### 3D Reinforcement Learning
-
-| Metric | DQN | PPO |
-|---|---:|---:|
-| Success | True | True |
-| Episode steps | 87 | **74** |
-| Path length | 174.00 | **146.30** |
-| Minimum clearance | 1.24 | **1.69** |
-| Trajectory roughness | 232.00 | **4.30** |
-
-
-### Multi-Agent Joint Planning
-
-| Algorithm | Success | Total Path | Makespan | Minimum Agent Distance |
-|---|---:|---:|---:|---:|
-| ACO | True | **378.339** | **27.010 s** | 3.344 |
-| GA | True | 384.031 | 28.347 s | 3.905 |
-| GWO | True | 424.562 | 36.955 s | 3.289 |
-| PSO | True | 392.966 | 31.603 s | **4.605** |
-
-
----
 
 ## Repository Structure
 
