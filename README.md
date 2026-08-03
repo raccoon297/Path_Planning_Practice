@@ -22,7 +22,7 @@
 
 ---
 
-## Project Gallery
+## Project Showcase
 
 <table>
   <tr>
